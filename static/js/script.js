@@ -7,8 +7,10 @@ const closeBtn = document.querySelector('.close-btn');
 const saveUserBtn = document.getElementById('saveUser');
 const userNameInput = document.getElementById('userName');
 
+
 let users = [];
 let activeCycleSelect = null;
+
 const raceStates = new Map();
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -260,10 +262,22 @@ function stopRace(cycleId) {
         body: JSON.stringify({ name: user, cycle: cycleId, energy, duration })
     });
 
-    card.querySelector('.start-btn').style.display = 'block';
+    // Reset UI
+    card.querySelector('.start-btn').style.display = 'none';
     card.querySelector('.stop-btn').style.display = 'none';
     card.querySelector('.cycle-race-info').style.display = 'none';
-    card.querySelector('.cycle-user-select').disabled = false;
+
+    const select = card.querySelector('.cycle-user-select');
+    select.disabled = false;
+
+    // Reset dropdown to default and card name
+    if (select.choicesInstance) {
+        select.choicesInstance.setChoiceByValue('');
+    }
+    select.value = '';
+    card.querySelector('.cycle-name').textContent = `Cycle ${cycleId}`;
+    card.classList.remove('selected');
+
     showNotification(`Race stopped!`);
 }
 

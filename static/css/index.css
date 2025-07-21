@@ -430,6 +430,9 @@ body {
     max-height: calc(100vh - 200px);
     padding-right: 0.5rem;
     margin-bottom: 1rem;
+    overflow: visible !important;
+    position: relative;
+    z-index: 0;
 }
 
 /* Custom scrollbar */
@@ -462,9 +465,54 @@ body {
     border: 2px solid var(--border);
     transition: all 0.3s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    position: relative;
+    z-index: 1;
+    overflow: visible !important;
     
 }
 
+.choices {
+  position: relative;
+  z-index: 10000;
+}
+.cycle-card {
+  position: relative;
+  z-index: 10;
+  overflow: visible !important;
+}
+
+.choices__list--dropdown {
+  position: absolute !important;
+  z-index: 99999 !important;
+}
+
+.cycles-grid, .cycles-container {
+  overflow: visible !important;
+  position: relative;
+}
+
+.choices__list--dropdown {
+  position: absolute !important;
+  z-index: 99999 !important;
+  background: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  overflow-y: auto;
+  max-height: 200px; /* optional for scroll */
+}
+.cycles-grid {
+  overflow: visible !important;
+  position: relative;
+  z-index: 0;
+}
+
+
+.cycles-grid {
+  overflow: visible !important;
+}
+.choices__list--dropdown {
+    z-index: 10000 !important;
+}
 .cycle-card.selected {
     background-color: var(--white);
     border-color: var(--primary);
