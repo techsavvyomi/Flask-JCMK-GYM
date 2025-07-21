@@ -94,7 +94,7 @@ function updateUserDropdowns() {
 function handleUserSelect(e) {
   const select = e.target;
   const card   = select.closest('.cycle-card');
-  if (select.value === 'register') {
+ if (select.value === 'register') {
     activeCycleSelect = select;
     registerPopup.style.display = 'flex';
     select.value = '';
@@ -188,16 +188,58 @@ function stopCycle(card) {
   if (typeof card === 'string') {
     card = document.querySelector(`.cycle-card[data-cycle-id="${card}"]`);
   }
-  const id    = card.dataset.cycleId;
-  const state = raceStates.get(id);
+
+  const id     = card.dataset.cycleId;
+  const state  = raceStates.get(id);
+  if (!state) return;
+
   clearInterval(state.intervalId);
   raceStates.delete(id);
+
+  // Get session duration (in seconds)
+  const durationSec = Math.floor((Date.now() - state.startTime) / 1000);
+  const durationStr = `${String(Math.floor(durationSec / 60)).padStart(2, '0')}:${String(durationSec % 60).padStart(2, '0')}`;
+
+  // Get user and energy
   const select = card.querySelector('.cycle-user-select');
+  const userId = select.value;
+  const energyText = card.querySelector('.energy-generated').textContent;
+  const energy = parseFloat(energyText.replace('Wh', '').trim()) || 0;
+
+  // Reset UI
   select.disabled = false;
   card.querySelector('.stop-btn').style.display = 'none';
   card.querySelector('.cycle-race-info').style.display = 'none';
-  showNotification(`Stopped cycle ${id}`);
+  select.value = ''; // Reset to "Select User"
   updateUserDropdowns();
+  updateCardStyle(select);
+
+  showNotification(`Stopped cycle ${id}`);
+
+  // Save to CSV if race was running
+  if (userId && durationSec > 0 && energy > 0) {
+    saveSessionToCSV(id, userId, durationStr, energy);
+  }
+}
+
+function saveSessionToCSV(cycleId, userId, duration, energy) {
+  const user = users.find(u => u.id === userId);
+  if (!user) return;
+
+  fetch('/api/save_competition', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: user.name,
+      user_id: userId,
+      duration: duration,
+      cycle: cycleId,
+      energy: energy,
+      timestamp: new Date().toISOString()
+    })
+  }).then(res => res.json())
+    .then(data => console.log('✅ Saved:', data))
+    .catch(err => console.error('❌ Save failed:', err));
 }
 
 // --- Live energy polling ---
@@ -227,20 +269,28 @@ function setupEventListeners() {
 function saveUser() {
   const name = userNameInput.value.trim();
   if (!name) return showNotification('Enter a name');
+
+  // Prevent duplicate names
   if (users.some(u => u.name.toLowerCase() === name.toLowerCase()))
     return showNotification('Already exists');
+
   const user = { id: 'user_' + Date.now(), name };
   users.push(user);
   saveUsers();
   updateUserDropdowns();
+
   if (activeCycleSelect) {
-    activeCycleSelect.value = user.id;
+    activeCycleSelect.value = '';  // Reset dropdown to "Select User"
+    const event = new Event('change', { bubbles: true });
+    activeCycleSelect.dispatchEvent(event);
     activeCycleSelect = null;
   }
+
   registerPopup.style.display = 'none';
   userNameInput.value = '';
   showNotification('User added');
 }
+
 
 // --- Card style helper ---
 function updateCardStyle(select) {

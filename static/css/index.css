@@ -466,25 +466,16 @@ body {
     transition: all 0.3s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     position: relative;
-    z-index: 1;
     overflow: visible !important;
     
 }
+
 
 .choices {
   position: relative;
   z-index: 10000;
 }
-.cycle-card {
-  position: relative;
-  z-index: 10;
-  overflow: visible !important;
-}
 
-.choices__list--dropdown {
-  position: absolute !important;
-  z-index: 99999 !important;
-}
 
 .cycles-grid, .cycles-container {
   overflow: visible !important;
@@ -493,13 +484,16 @@ body {
 
 .choices__list--dropdown {
   position: absolute !important;
-  z-index: 99999 !important;
+  z-index: 9999  !important;
   background: white;
   border: 1px solid #ccc;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   overflow-y: auto;
   max-height: 200px; /* optional for scroll */
 }
+
+
+
 .cycles-grid {
   overflow: visible !important;
   position: relative;
@@ -510,14 +504,13 @@ body {
 .cycles-grid {
   overflow: visible !important;
 }
-.choices__list--dropdown {
-    z-index: 10000 !important;
-}
+
 .cycle-card.selected {
     background-color: var(--white);
     border-color: var(--primary);
     box-shadow: 0 4px 12px rgba(74, 107, 255, 0.15);
     transform: translateY(-2px);
+    
 }
 
 .cycle-avatar {
@@ -616,12 +609,12 @@ body {
 }
 
 .race-duration::before {
-    content: '⏱️';
+    content: 'â±ï¸';
     font-size: 1rem;
 }
 
 .energy-generated::before {
-    content: '⚡';
+    content: 'âš¡';
     font-size: 1rem;
 }
 

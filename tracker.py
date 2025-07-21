@@ -116,3 +116,24 @@ def get_normal_sessions():
     except Exception as e:
         print(f"[Tracker] Error reading CSV: {e}")
     return records
+
+def get_competition_sessions(competition=True):
+    filename = 'data/competition_sessions.csv'
+    records = []
+    try:
+        with open(filename, newline='') as f:
+            reader = csv.reader(f)
+            next(reader, None)  # skip header
+            for row in reader:
+                duration = row[2]
+                energy = float(row[4])
+                records.append({
+                    "timestamp": row[5],
+                    "cycle": row[3],
+                    "name": row[0],
+                    "duration": duration,
+                    "energy": f"{energy:.1f} Wh"
+                })
+    except Exception as e:
+        print(f"[Competition] Error reading CSV: {e}")
+    return records
