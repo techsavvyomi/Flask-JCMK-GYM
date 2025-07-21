@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gym Racing Arena</title>
+    <link rel="stylesheet" href="/static/css/index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Gym Racing Arena</h1>
+           
+            <div class="header-actions">
+                <div class="mode-selector">
+                    <div class="mode-buttons">
+                        <a href="/normal-log" class="log-button">
+                            <i class="fas fa-clipboard-list"></i>
+                            View Logs
+                        </a>
+                        <button class="mode-btn active" data-mode="normal">
+                            <i class="fas fa-bicycle"></i>
+                            Normal Mode
+                        </button>
+                        <a href="/competition" class="mode-btn competition">
+                            <i class="fas fa-trophy"></i>
+                         Competition Mode
+                        </a>        
+                    </div>
+                </div>
+            </div>
+        </header>
+        <main class="main-content">
+            <div class="cycles-container">
+                <h2>Available Cycles</h2>
+                <div class="cycles-grid" id="cyclesContainer">
+                    
+                </div>
+            </div>
+
+         
+            <div id="registerPopup" class="popup">
+                <div class="popup-content">
+                    <span class="close-btn">&times;</span>
+                    <h3>Register New User</h3>
+                    <div class="form-group">
+                        <input type="text" id="userName" placeholder="Enter your name" class="form-input" required>
+                    </div>
+                    <button id="saveUser" class="save-btn">Save User</button>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="/static/js/script.js"></script>
+</body>
+</html>
