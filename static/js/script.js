@@ -69,9 +69,46 @@ function startRace(select) {
 
     raceStates.set(cycleId, raceState);
     updateRaceStats(card, raceState);
-    showNotification(`${user.name}'s race started!`);
+    showNotification(`${user.name}'s cycle is registered`);
 }
 
+function handleLogAccess(e) {
+    e.preventDefault();
+    document.getElementById('passwordModal').style.display = 'flex';
+    }
+
+    function closePasswordModal() {
+    document.getElementById('passwordModal').style.display = 'none';
+    }
+
+    function verifyPassword() {
+    const password = document.getElementById('logPassword').value;
+    if (password === '1234') {
+        window.location.href = "/normal-log";
+    } else {
+        showNotification("Incorrect password!");
+        document.getElementById('logPassword').value = '';
+    }
+}
+function openCompetitionModal() {
+    document.getElementById('competitionModal').style.display = 'flex';
+    }
+
+    function closeCompetitionModal() {
+    document.getElementById('competitionModal').style.display = 'none';
+    }
+
+    function confirmCompetitionMode() {
+    // Stop all races first (if needed)
+    document.querySelectorAll('.cycle-card .stop-btn').forEach(btn => {
+        if (btn.style.display === 'block') {
+        btn.click();  // Gracefully triggers stopRace logic
+        }
+    });
+
+    // Redirect to competition mode
+    window.location.href = "/competition";
+}
 
 function createCycleCards() {
     cyclesContainer.innerHTML = '';
@@ -87,7 +124,7 @@ function createCycleCards() {
                 <div class="energy-generated">0 Wh</div>
             </div>
             <div class="cycle-controls">
-                <select class="cycle-user-select">
+                <select class="cycle-user-select choices-select" data-placeholder="Select User">
                     <option value="">Select User</option>
                     <option value="register">Register New User</option>
                 </select>
@@ -105,24 +142,55 @@ function createCycleCards() {
 function updateUserDropdowns() {
     document.querySelectorAll('.cycle-user-select').forEach(select => {
         const current = select.value;
-        while (select.options.length > 2) select.remove(2);
+
+        // Destroy existing Choices instance if exists
+        if (select.choicesInstance) {
+            select.choicesInstance.destroy();
+        }
+
+        // Remove all options except first two
+        while (select.options.length > 2) {
+            select.remove(2);
+        }
+
+        // Re-add updated user list
         users.forEach(user => {
             const opt = document.createElement('option');
             opt.value = user.id;
             opt.textContent = user.name;
             select.add(opt);
         });
+
+        // Restore selection
         select.value = current;
         updateCardStyle(select);
 
-        if (current && current !== 'register') {
+        // Logic to toggle Start button visibility
+        if (current && current !== 'register' && users.find(u => u.id === current)) {
             const card = select.closest('.cycle-card');
             const startBtn = card.querySelector('.start-btn');
-            startBtn.style.display = 'block';
-            startBtn.onclick = () => startRace(select);
+
+            if (!isUserAlreadyRacing(current)) {
+                startBtn.style.display = 'block';
+                startBtn.onclick = () => startRace(select);
+            } else {
+                startBtn.style.display = 'none';
+                startBtn.onclick = null;
+            }
         }
+
+        // Re-apply Choices.js instance
+        const choices = new Choices(select, {
+            shouldSort: false,
+            searchEnabled: true,
+            placeholder: true,
+            itemSelectText: '',
+        });
+        select.choicesInstance = choices;
     });
 }
+
+
 
 function handleUserSelect(e) {
     const select = e.target;
@@ -145,8 +213,13 @@ function handleUserSelect(e) {
     updateCardStyle(select);
     if (select.value && select.value !== 'register') {
         const startBtn = card.querySelector('.start-btn');
-        startBtn.style.display = 'block';
-        startBtn.onclick = () => startRace(select);
+        if (!isUserAlreadyRacing(select.value)) {
+            startBtn.style.display = 'block';
+            startBtn.onclick = () => startRace(select);
+        } else {
+            startBtn.style.display = 'none';
+            startBtn.onclick = null;
+        }
     }
 }
 
@@ -231,23 +304,42 @@ function showNotification(msg) {
 function saveUser() {
     const name = userNameInput.value.trim();
     if (!name) return;
+
+    const duplicate = users.some(user => user.name.toLowerCase() === name.toLowerCase());
+    if (duplicate) {
+        showNotification(`User "${name}" already exists!`);
+        return;
+    }
+
     const newUser = { id: 'user_' + Date.now(), name };
     users.push(newUser);
     saveUsers();
-    updateUserDropdowns();
+
     if (activeCycleSelect) {
+        const choices = activeCycleSelect.choicesInstance;
+
+        if (choices) {
+            choices.setChoices([
+                { value: '', label: 'Select User', disabled: true },
+                { value: 'register', label: 'Register New User' },
+                ...users.map(u => ({ value: u.id, label: u.name }))
+            ], 'value', 'label', true);
+
+            choices.setChoiceByValue(newUser.id);
+        }
+
         activeCycleSelect.value = newUser.id;
-        updateCardStyle(activeCycleSelect);
-        const card = activeCycleSelect.closest('.cycle-card');
-        const startBtn = card.querySelector('.start-btn');
-        startBtn.style.display = 'block';
-        startBtn.onclick = () => startRace(activeCycleSelect);
+        const event = new Event('change', { bubbles: true });
+        activeCycleSelect.dispatchEvent(event);
         activeCycleSelect = null;
     }
+
     registerPopup.style.display = 'none';
     userNameInput.value = '';
-    showNotification(`User \"${name}\" registered successfully!`);
+    showNotification(`User "${name}" registered successfully!`);
 }
+
+
 function pollLiveEnergy() {
     fetch('/api/live_energy')
         .then(res => res.json())
