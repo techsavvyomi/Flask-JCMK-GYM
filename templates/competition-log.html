@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Competition Logs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #ff6b6b;
+            --primary-light: #ffebee;
+            --text: #1a1a1a;
+            --text-light: #666;
+            --bg: #f8f9fa;
+            --border: #e0e0e0;
+            --success: #4caf50;
+            --error: #f44336;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .back-button:hover {
+            background: #ff5252;
+            transform: translateY(-1px);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            color: var(--text);
+        }
+
+        .record-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .record-selector {
+            flex: 1;
+            max-width: 300px;
+            position: relative;
+        }
+
+        .export-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .export-button:hover:not(:disabled) {
+            background: #3d8b40;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .export-button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .export-button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .select-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .record-dropdown {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background-color: var(--white);
+            font-size: 1rem;
+            color: var(--text);
+            appearance: none;
+            cursor: pointer;
+            padding-right: 2.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .record-dropdown:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.2);
+        }
+
+        .select-wrapper i {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            pointer-events: none;
+        }
+
+        .leaderboard-container {
+            width: 100%;
+        }
+
+        .leaderboard {
+            width: 100%;
+            background: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .leaderboard h2 {
+            font-size: 1.4rem;
+            margin: 0;
+            padding: 1.5rem;
+            color: var(--text);
+            background-color: var(--primary-light);
+            border-bottom: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: rgba(255, 107, 107, 0.05);
+        }
+
+        .energy-cell {
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        .duration-cell {
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-light);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .record-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .record-selector {
+                max-width: 100%;
+            }
+            
+            .export-button, .record-dropdown {
+                width: 100%;
+            }
+            
+            th, td {
+                padding: 0.8rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                Back to Home
+            </a>
+            <h1>Competition Logs</h1>
+            <div></div> <!-- Empty div for flex spacing -->
+        </div>
+
+        <div class="record-actions">
+            <div class="record-selector">
+                <div class="select-wrapper">
+                    <select id="recordType" class="record-dropdown" disabled>
+                    <option value="all" selected>Competition Leaderboard</option>
+                    </select>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+            <button id="exportCsv" class="export-button" disabled>
+                <i class="fas fa-file-export"></i>
+                Export to CSV
+            </button>
+        </div>
+
+        <div class="leaderboard-container">
+            <div class="leaderboard">
+                <h2>Competition Leaderboard</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Duration</th>
+                            <th>Energy (Wh)</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="allCompetitionsBody">
+                        <tr>
+                            <td colspan="5" class="no-data">Loading competition data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+
+    <script>
+        
+  let recordsData = [];
+  let currentColumns = [
+    { key: 'name', header: 'Name' },
+    { key: 'duration', header: 'Duration' },
+    { key: 'timestamp', header: 'Date' },
+    { key: 'energy', header: 'Energy (Wh)' }
+  ];
+
+  function populateTable(containerId, data, columns) {
+    const tbody = document.getElementById(containerId);
+    if (!tbody) return;
+
+    if (!data || data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="${columns.length + 1}" class="no-data">No records available</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = data.map((item, index) => {
+      let row = `<tr><td>${index + 1}</td>`;
+      columns.forEach(col => {
+        const value = item[col.key] || '';
+        const cellClass = col.class || '';
+        row += `<td class="${cellClass}">${value}</td>`;
+      });
+      row += '</tr>';
+      return row;
+    }).join('');
+  }
+
+  function convertToCSV(data, columns) {
+    const headers = ['Rank', ...columns.map(col => col.header || col.key)];
+    const rows = data.map((item, i) => {
+      const row = [i + 1];
+      columns.forEach(col => {
+        let v = item[col.key] || '';
+        if (typeof v === 'string' && (v.includes(',') || v.includes('"') || v.includes('\n'))) {
+          v = `"${v.replace(/"/g, '""')}"`;
+        }
+        row.push(v);
+      });
+      return row.join(',');
+    });
+    return [headers.join(','), ...rows].join('\n');
+  }
+
+  function downloadCSV(csv, filename) {
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+  }
+
+  // Format duration for sorting (converts MM:SS to seconds)
+  function durationToSeconds(duration) {
+    if (!duration) return 0;
+    const [minutes, seconds] = String(duration).split(':').map(Number);
+    return (minutes * 60) + (seconds || 0);
+  }
+
+  // Format energy value (remove ' Wh' and convert to number)
+  function parseEnergy(energy) {
+    if (!energy) return 0;
+    return parseFloat(String(energy).replace(' Wh', '')) || 0;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const exportBtn = document.getElementById('exportCsv');
+    const tableBody = document.getElementById('allCompetitionsBody');
+
+    fetch('/api/competition_leaderboard')
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        // Sort by energy (descending) and then by duration (ascending)
+        recordsData = data.sort((a, b) => {
+          const energyA = parseEnergy(a.energy);
+          const energyB = parseEnergy(b.energy);
+          if (energyB !== energyA) return energyB - energyA;
+          
+          const durationA = durationToSeconds(a.duration);
+          const durationB = durationToSeconds(b.duration);
+          return durationA - durationB;
+        });
+
+        populateTable('allCompetitionsBody', recordsData, currentColumns);
+        exportBtn.disabled = false;
+        
+        // Add event listeners for sorting
+        document.querySelectorAll('th').forEach(header => {
+          header.style.cursor = 'pointer';
+          header.addEventListener('click', () => {
+            const key = header.textContent.trim().toLowerCase();
+            const column = currentColumns.find(col => 
+              col.header.toLowerCase() === key || col.key.toLowerCase() === key
+            );
+            
+            if (column) {
+              const sortKey = column.key;
+              const isAsc = header.getAttribute('data-sort') === 'asc';
+              
+              recordsData.sort((a, b) => {
+                let valA, valB;
+                
+                if (sortKey === 'energy') {
+                  valA = parseEnergy(a[sortKey]);
+                  valB = parseEnergy(b[sortKey]);
+                } else if (sortKey === 'duration') {
+                  valA = durationToSeconds(a[sortKey]);
+                  valB = durationToSeconds(b[sortKey]);
+                } else {
+                  valA = String(a[sortKey] || '').toLowerCase();
+                  valB = String(b[sortKey] || '').toLowerCase();
+                }
+                
+                if (valA < valB) return isAsc ? -1 : 1;
+                if (valA > valB) return isAsc ? 1 : -1;
+                return 0;
+              });
+              
+              // Toggle sort direction
+              header.setAttribute('data-sort', isAsc ? 'desc' : 'asc');
+              header.innerHTML = `${column.header} ${isAsc ? '↓' : '↑'}`;
+              
+              // Reset other headers
+              document.querySelectorAll('th').forEach(h => {
+                if (h !== header) {
+                  h.removeAttribute('data-sort');
+                  h.innerHTML = h.textContent.replace(/[↑↓]\s*$/, '');
+                }
+              });
+              
+              populateTable('allCompetitionsBody', recordsData, currentColumns);
+            }
+          });
+        });
+      })
+      .catch(err => {
+        console.error("❌ Failed to load leaderboard:", err);
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="5" class="no-data">
+              Error loading leaderboard: ${err.message}
+            </td>
+          </tr>`;
+      });
+
+    exportBtn.addEventListener('click', () => {
+      if (!recordsData.length) return alert("No data to export.");
+      const csv = convertToCSV(recordsData, currentColumns);
+      const filename = `competition_leaderboard_${new Date().toISOString().slice(0,10)}.csv`;
+      downloadCSV(csv, filename);
+    });
+  });
+</script>
+
+</body>
+</html>

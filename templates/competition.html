@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Competition Mode - Racing Arena</title>
+
+    <link rel="stylesheet" href="/static/css/competition.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  
+</head>
+<body class="competition-mode">
+    <div class="container">
+        <header class="header">
+           <a href="/" class="back-button">
+                 <i class="fas fa-arrow-left"></i>
+                 Back
+            </a>
+            
+            <div class="header-content">
+                <h1>Competition Mode</h1>
+                <p class="subtitle">Select cycles and users to start the race</p>
+                
+                <div class="header-actions">
+                    <div class="timer-controls">
+                        <div class="timer-input">
+                            <label for="raceDuration">Race Duration (minutes):</label>
+                            <input type="number" id="raceDuration" min="1" max="60" value="5" class="time-input">
+                        </div>
+                        
+                        <div class="actions-row">
+                            <div id="raceStatus">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Select cycles to start the race</span>
+                            </div>
+                            
+                            <div class="action-buttons">
+                                <a href="/competition-log" class="log-button">
+                                    <i class="fas fa-clipboard-list"></i>
+                                    View Logs
+                                </a>
+                                <button class="start-race-btn" id="startRaceTop">
+                                    <i class="fas fa-flag-checkered"></i>
+                                    Start Race
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="countdown" id="countdown">
+                <div class="countdown-number">3</div>
+                <div class="countdown-msg">Get Ready!</div>
+            </div>
+
+            <div class="cycles-container">
+                <div class="cycles-grid" id="cyclesContainer">
+                    <!-- Cycle cards will be inserted here by JavaScript -->
+                </div>
+            </div>
+
+            <button class="start-competition-btn" id="startCompetition" disabled>
+                Start Competition
+            </button>
+        </main>
+    </div>
+
+    <!-- User Registration Popup -->
+    <div class="popup" id="registerPopup">
+    <div class="popup-content">
+        <span class="close-btn">&times;</span>
+        <h3>Register New User</h3>
+        <div class="form-group">
+        <input type="text" id="userName" placeholder="Enter your name" class="form-input" required />
+        </div>
+        <button id="saveUser" class="save-btn">Save User</button>
+    </div>
+    </div>
+
+
+    <script src="/static/js/competition.js"></script>
+</body>
+</html>

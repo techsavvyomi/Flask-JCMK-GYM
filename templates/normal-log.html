@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Normal Mode Logs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4a6bff;
+            --primary-light: #eef1ff;
+            --text: #1a1a1a;
+            --text-light: #666;
+            --bg: #f8f9fa;
+            --border: #e0e0e0;
+            --success: #4caf50;
+            --error: #f44336;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .back-button:hover {
+            background: #3a5bff;
+            transform: translateY(-1px);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            color: var(--text);
+        }
+
+        .leaderboard {
+            width: 100%;
+            background: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: rgba(74, 107, 255, 0.02);
+        }
+
+        .energy-cell {
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        .duration-cell {
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-light);
+        }
+
+        .record-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .record-selector {
+            flex: 1;
+            max-width: 300px;
+            position: relative;
+        }
+
+        .export-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .export-button:hover:not(:disabled) {
+            background: #3d8b40;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .export-button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .export-button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .select-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .record-dropdown {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background-color: var(--white);
+            font-size: 1rem;
+            color: var(--text);
+            appearance: none;
+            cursor: pointer;
+            padding-right: 2.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .record-dropdown:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(74, 107, 255, 0.2);
+        }
+
+        .select-wrapper i {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            pointer-events: none;
+        }
+
+        .leaderboard-container {
+            width: 100%;
+        }
+
+        .leaderboard h2 {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            color: var(--text);
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            th, td {
+                padding: 0.8rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                Back to Home
+            </a>
+            <h1>Normal Mode Leaderboard</h1>
+            <div></div> <!-- Empty div for flex spacing -->
+        </div>
+
+        <div class="record-actions">
+            <div class="record-selector">
+                <div class="select-wrapper">
+                    <select id="recordType" class="record-dropdown">
+                        <option value="">Select a record type</option>
+                        <option value="daily">Daily Records</option>
+                        <option value="weekly">Weekly Records</option>
+                        <option value="monthly">Monthly Records</option>
+                        <option value="all">All Records</option>
+                    </select>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+            <button id="exportCsv" class="export-button" disabled>
+                <i class="fas fa-file-export"></i>
+                Export to CSV
+            </button>
+        </div>
+
+        <div class="leaderboard-container">
+            <div class="leaderboard" id="dailyRecords" style="display: none;">
+                <h2>Daily Records</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Duration</th>
+                            <th>Session</th>
+                            <th>Energy</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dailyRecordsBody">
+                        <tr>
+                            <td colspan="5" class="no-data">No daily records available</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="leaderboard" id="weeklyRecords" style="display: none;">
+                <h2>Weekly Records</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Duration</th>
+                            <th>Week</th>
+                            <th>Total Energy</th>
+                        </tr>
+                    </thead>
+                    <tbody id="weeklyRecordsBody">
+                        <tr>
+                            <td colspan="5" class="no-data">No weekly records available</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="leaderboard" id="monthlyRecords" style="display: none;">
+                <h2>Monthly Records</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Duration</th>
+                            <th>Month</th>
+                            <th>Total Energy</th>
+                        </tr>
+                    </thead>
+                    <tbody id="monthlyRecordsBody">
+                        <tr>
+                            <td colspan="5" class="no-data">No monthly records available</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="leaderboard" id="allRecords" style="display: none;">
+                <h2>All Records</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Duration</th>
+                            <th>Date</th>
+                            <th>Energy</th>
+                        </tr>
+                    </thead>
+                    <tbody id="allRecordsBody">
+                        <tr>
+                            <td colspan="5" class="no-data">No records available</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    
+<script>
+  console.log("🔧 normal-log script loaded");
+
+  let recordsData = [];
+  let currentTableRows = [];
+  let currentColumns = [];
+  let currentPage = 1;
+  const rowsPerPage = 6;
+
+  // Helper: Show a page of table data with Prev/Next
+  function populateTable(containerId, data, columns, page = 1) {
+    currentTableRows = data;
+    currentColumns = columns;
+    currentPage = page;
+    showPage(containerId, page);
+  }
+
+  // Show table rows for the given page and Prev/Next
+  function showPage(containerId, page = 1) {
+    const tbody = document.getElementById(containerId);
+    const pag = document.getElementById("pagination");
+    const total = currentTableRows.length;
+    const pageCount = Math.ceil(total / rowsPerPage);
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    const rows = currentTableRows.slice(start, end);
+
+    console.log(`📄 showPage: #${page}, rows ${start + 1} to ${end}, total=${total}`);
+
+    // Table rows
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="${currentColumns.length + 1}" class="no-data">No records available</td></tr>`;
+      pag.innerHTML = '';
+      return;
+    }
+    tbody.innerHTML = rows.map((item, i) => {
+      let row = `<tr><td>${start + i + 1}</td>`;
+      currentColumns.forEach(col => {
+        let v = item[col.key] ?? '';
+        const cls = col.key === 'energy'
+          ? 'energy-cell'
+          : col.key === 'duration'
+            ? 'duration-cell'
+            : '';
+        row += `<td class="${cls}">${v}</td>`;
+      });
+      return row + '</tr>';
+    }).join('');
+
+    // Prev/Next navigation
+    let nav = '';
+    if (page > 1)
+      nav += `<button class="nav-btn" onclick="showPage('${containerId}',${page-1})">Previous</button>`;
+    if (page < pageCount)
+      nav += `<button class="nav-btn" onclick="showPage('${containerId}',${page+1})">Next</button>`;
+    pag.innerHTML = nav;
+  }
+  window.showPage = showPage;
+
+  // CSV Export
+  function convertToCSV(data, columns) {
+    const headers = ['#', ...columns.map(c => c.header || c.key)];
+    const rows = data.map((item, i) => {
+      const vals = [i + 1, ...columns.map(c => {
+        let v = item[c.key] ?? '';
+        if (typeof v === 'string' && (v.includes(',') || v.includes('"'))) v = `"${v.replace(/"/g, '""')}"`;
+        return v;
+      })];
+      return vals.join(',');
+    });
+    return [headers.join(','), ...rows].join('\n');
+  }
+  function downloadCSV(csv, filename) {
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const sel = document.getElementById('recordType');
+    const btn = document.getElementById('exportCsv');
+    document.querySelectorAll('.leaderboard').forEach(lb => {
+      if (!lb.nextElementSibling || !lb.nextElementSibling.classList.contains('pagination')) {
+        const div = document.createElement('div');
+        div.className = 'pagination';
+        div.id = 'pagination';
+        lb.parentNode.insertBefore(div, lb.nextSibling);
+      }
+    });
+
+    fetch('/api/normal_leaderboard')
+      .then(r => r.json())
+      .then(data => {
+        recordsData = data;
+        sel.value = 'daily';
+        showRecordType('daily');
+        btn.disabled = false;
+      })
+      .catch(err => console.error("❌ Load failed:", err));
+
+    sel.addEventListener('change', () => {
+      showRecordType(sel.value);
+      btn.disabled = !sel.value;
+    });
+    btn.addEventListener('click', () => {
+      const type = sel.value;
+      const { data, columns } = getCurrentTableData(type);
+      if (!data.length) return alert('No data to export');
+      const csv = convertToCSV(data, columns);
+      downloadCSV(csv, `gym_records_${type}_${new Date().toISOString().slice(0,10)}.csv`);
+    });
+  });
+
+  function showRecordType(type) {
+    document.querySelectorAll('.leaderboard').forEach(el => el.style.display = 'none');
+    if (!type) return;
+    document.getElementById(`${type}Records`).style.display = 'block';
+    const { data, columns } = getCurrentTableData(type);
+    const bodyId = `${type}RecordsBody`;
+    populateTable(bodyId, data, columns, 1);
+  }
+function parseCSVTimestamp(ts) {
+  // Ensures compatibility across browsers by adding 'Z' for UTC
+  // Remove fractional seconds if present (older Safari issues)
+  let clean = ts.split('.')[0] + 'Z';
+  return new Date(clean);
+}
+ function getCurrentTableData(type) {
+  const today = new Date();
+  const todayStr = today.toISOString().slice(0, 10);
+  let filtered = [], columns = [];
+  
+  if (type === 'daily') {
+    filtered = recordsData.filter(r => r.timestamp.startsWith(todayStr));
+    columns = [
+      { key: 'name',     header: 'Name' },
+      { key: 'duration', header: 'Duration' },
+      { key: 'start',    header: 'Session' },
+      { key: 'energy',   header: 'Energy (Wh)' }
+    ];
+    filtered = filtered.slice().reverse(); // newest on top
+  }
+  else if (type === 'weekly') {
+    const wkAgo = new Date(today);
+    wkAgo.setDate(today.getDate() - 7);
+    // Group by name for the week
+    let sessions = recordsData.filter(r => {
+      const d = parseCSVTimestamp(r.timestamp);
+      return d >= wkAgo && d <= today;
+    });
+    // Aggregate by student
+    let agg = {};
+    for (let r of sessions) {
+      let name = r.name;
+      let durationSec = 0;
+      if (r.duration && r.duration.includes(':')) {
+        let [m, s] = r.duration.split(':').map(Number);
+        durationSec = m * 60 + s;
+      }
+      let energyWh = 0;
+      if (r.energy) energyWh = parseFloat(r.energy);
+
+      if (!agg[name]) {
+        agg[name] = { name, totalDurationSec: 0, totalEnergyWh: 0, week: 'This Week' };
+      }
+      agg[name].totalDurationSec += durationSec;
+      agg[name].totalEnergyWh += energyWh;
+    }
+    filtered = Object.values(agg).sort((a, b) => b.totalEnergyWh - a.totalEnergyWh)
+      .map(user => ({
+        name: user.name,
+        duration: `${Math.floor(user.totalDurationSec / 60)}:${String(user.totalDurationSec % 60).padStart(2, '0')}`,
+        week: user.week,
+        energy: user.totalEnergyWh.toFixed(1)
+      }));
+    columns = [
+      { key: 'name',     header: 'Name' },
+      { key: 'duration', header: 'Total Duration' },
+      { key: 'week',     header: 'Week' },
+      { key: 'energy',   header: 'Total Energy (Wh)' }
+    ];
+    // Newest on top not needed, already sorted by totalEnergyWh
+  }
+  else if (type === 'monthly') {
+    // 1. Filter only current month
+    let sessions = recordsData.filter(r => {
+      const d = parseCSVTimestamp(r.timestamp);
+      return d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+    });
+    // 2. Aggregate by student
+    let agg = {};
+    for (let r of sessions) {
+      let name = r.name;
+      let durationSec = 0;
+      if (r.duration && r.duration.includes(':')) {
+        let [m, s] = r.duration.split(':').map(Number);
+        durationSec = m * 60 + s;
+      }
+      let energyWh = 0;
+      if (r.energy) energyWh = parseFloat(r.energy);
+
+      if (!agg[name]) {
+        agg[name] = { name, totalDurationSec: 0, totalEnergyWh: 0, month: parseCSVTimestamp(r.timestamp).toLocaleString('default', { month: 'long', year: 'numeric' }) };
+      }
+      agg[name].totalDurationSec += durationSec;
+      agg[name].totalEnergyWh += energyWh;
+    }
+    filtered = Object.values(agg).sort((a, b) => b.totalEnergyWh - a.totalEnergyWh)
+      .map(user => ({
+        name: user.name,
+        duration: `${Math.floor(user.totalDurationSec / 60)}:${String(user.totalDurationSec % 60).padStart(2, '0')}`,
+        month: user.month,
+        energy: user.totalEnergyWh.toFixed(1)
+      }));
+    columns = [
+      { key: 'name',     header: 'Name' },
+      { key: 'duration', header: 'Total Duration' },
+      { key: 'month',    header: 'Month' },
+      { key: 'energy',   header: 'Total Energy (Wh)' }
+    ];
+    // No reverse, already sorted
+  }
+  else if (type === 'all') {
+    filtered = recordsData.slice().reverse(); // newest on top
+    columns = [
+      { key: 'name',      header: 'Name' },
+      { key: 'duration',  header: 'Duration' },
+      { key: 'timestamp', header: 'Date' },
+      { key: 'energy',    header: 'Energy (Wh)' }
+    ];
+  }
+
+  return { data: filtered, columns };
+}
+
+
+</script>
+
+<style>
+/* Add this to make buttons big for touch */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin: 16px 0 0 0;
+}
+.pagination .nav-btn {
+  background: #4a6bff;
+  color: #fff;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 2.2rem;
+  cursor: pointer;
+  font-weight: 600;
+  letter-spacing: 1px;
+  transition: background 0.18s;
+}
+.pagination .nav-btn:active, .pagination .nav-btn:focus {
+  background: #3a5bff;
+}
+</style>
+
+
+
+
+
+</body>
+</html>
