@@ -41,13 +41,6 @@ body {
     box-sizing: border-box;
 }
 
-/* Header */
-.header {
-    text-align: center;
-    margin-bottom: 2.5rem;
-    position: relative;
-    padding: 1rem 0;
-}
 
 .header-actions {
     display: flex;
@@ -145,7 +138,7 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.6rem 1.5rem;
+    padding: 0.6rem 1rem;
     border: none;
     border-radius: 8px;
     font-weight: 600;
@@ -174,8 +167,8 @@ body {
 .log-button {
     background: var(--white);
     color: var(--primary);
-    border: 2px solid var(--primary);
-    padding: 0.5rem 1.2rem;
+    border: none;
+    padding: 0.6rem 1rem;
 }
 
 .log-button:hover {
@@ -369,6 +362,43 @@ h1 {
     border: 2px solid var(--border);
     transition: all 0.3s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: visible !important;
+    
+}
+
+
+.choices {
+  position: relative;
+  z-index: 10000;
+}
+
+
+.cycles-grid, .cycles-container {
+  overflow: visible !important;
+  position: relative;
+}
+
+.choices__list--dropdown {
+  position: absolute !important;
+  z-index: 9999  !important;
+  background: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  overflow-y: auto;
+  max-height: 200px; /* optional for scroll */
+}
+
+
+.cycles-grid {
+  overflow: visible !important;
+  position: relative;
+  z-index: 0;
+}
+
+
+.cycles-grid {
+  overflow: visible !important;
 }
 
 .cycle-card.selected {
@@ -376,6 +406,7 @@ h1 {
     border-color: var(--primary);
     box-shadow: 0 4px 12px rgba(74, 107, 255, 0.15);
     transform: translateY(-2px);
+    
 }
 
 .cycle-avatar {
@@ -431,13 +462,8 @@ h1 {
 
 /* User Selection Dropdown */
 /* Cycle Controls */
-.cycle-controls {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin-top: 0.5rem;
-}
+.cycle-controls { min-width: 180px; }  /* whatever fits both values */
+
 
 .cycle-user-select {
     width: 100%;
@@ -456,14 +482,17 @@ h1 {
     background-size: 0.65rem auto;
 }
 
-/* Race Info */
-.cycle-race-info {
-    width: 100%;
-    margin: 0.5rem 0;
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.9rem;
-    color: var(--text-light);
+.cycle-race-info{
+  display: inline-flex;     /* stays on one line */
+  flex-wrap: nowrap;
+  gap: 8px;
+  white-space: nowrap;      /* prevent wrapping */
+}
+
+.cycle-race-info .race-duration,
+.cycle-race-info .energy-generated{
+  display: inline;          /* just in case something set them to block */
+  white-space: nowrap;
 }
 
 .race-duration,
@@ -512,10 +541,8 @@ h1 {
     transform: translateY(0);
 }
 
-.stop-btn {
-    background-color: #ff4d4f;
-    color: white;
-}
+.stop-btn { display:none !important; }
+
 
 .stop-btn:hover {
     background-color: #ff7875;
@@ -760,4 +787,46 @@ h1 {
 
 .notification.show {
     transform: translateX(-50%) translateY(0);
+}
+/* Header */
+.header {
+    position: relative;
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    padding: 0;
+}
+
+
+.back-button{
+  position:static;   /* remove absolute */
+  flex:0 0 auto;
+}
+
+
+.header h1 {
+    font-size: 1.5rem;
+    color: var(--text);
+    margin: 0;  flex-grow: 1;
+    text-align: center;
+    padding-top: 15px;
+}
+
+
+
+/* Optional: shrink inputs/buttons a bit */
+.time-input{ width: 70px; }
+
+/* Mobile tweak */
+@media (max-width:768px){
+  .header-top{
+    grid-template-columns: 1fr 1fr;   /* 2 cols */
+    grid-template-areas:
+      "back title"
+      "right right";
+  }
+  .back-button{ grid-area: back; justify-self: start; }
+  .title{ grid-area: title; justify-self: end; font-size: 1.6rem; }
+  .right-controls{ grid-area: right; justify-self: stretch; }
 }

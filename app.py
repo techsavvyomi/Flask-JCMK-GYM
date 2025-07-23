@@ -1,20 +1,21 @@
 from flask import Flask
 from ui import ui_blueprint
 from register_api import register_api
-from leaderboard_api import leaderboard_api
+from leaderboard_api import leaderboard_json
 from energy_api import energy_api
 from tracker import log_data
 from wifi_listener import WifiPoller
 import threading
+from competition_api import competition_api
 
 app = Flask(__name__)
 
 # Register all blueprints
 app.register_blueprint(ui_blueprint)
 app.register_blueprint(register_api)
-app.register_blueprint(leaderboard_api)
+app.register_blueprint(leaderboard_json)
 app.register_blueprint(energy_api)
-
+app.register_blueprint(competition_api)
 # Define the function that WifiPoller will call on receiving data
 def handle_data(data):
     try:

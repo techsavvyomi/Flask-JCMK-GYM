@@ -267,70 +267,26 @@
         </div>
 
         <div class="leaderboard-container">
-            <div class="leaderboard" id="recentCompetitions" style="display: none;">
-                <h2>Recent Competitions</h2>
+            <div class="leaderboard">
+                <h2>Competition Leaderboard</h2>
                 <table>
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Competition</th>
+                            <th>Name</th>
+                            <th>Duration</th>
                             <th>Date</th>
-                            <th>Participants</th>
-                            <th>Winner</th>
-                            <th>Prize</th>
-                        </tr>
-                    </thead>
-                    <tbody id="recentCompetitionsBody">
-                        <tr>
-                            <td colspan="6" class="no-data">No recent competitions available</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="leaderboard" id="upcomingCompetitions" style="display: none;">
-                <h2>Upcoming Competitions</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Competition</th>
-                            <th>Date</th>
-                            <th>Registered</th>
-                            <th>Prize Pool</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="upcomingCompetitionsBody">
-                        <tr>
-                            <td colspan="6" class="no-data">No upcoming competitions available</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="leaderboard" id="allCompetitions" style="display: none;">
-                <h2>All Competitions</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Competition</th>
-                            <th>Date</th>
-                            <th>Type</th>
-                            <th>Participants</th>
-                            <th>Winner</th>
+                            <th>Energy (Wh)</th>
                         </tr>
                     </thead>
                     <tbody id="allCompetitionsBody">
                         <tr>
-                            <td colspan="6" class="no-data">No competition data available</td>
+                            <td colspan="5" class="no-data">Loading competition data...</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
+
 
     <script>
         
@@ -390,18 +346,100 @@
     URL.revokeObjectURL(link.href);
   }
 
+  // Format duration for sorting (converts MM:SS to seconds)
+  function durationToSeconds(duration) {
+    if (!duration) return 0;
+    const [minutes, seconds] = String(duration).split(':').map(Number);
+    return (minutes * 60) + (seconds || 0);
+  }
+
+  // Format energy value (remove ' Wh' and convert to number)
+  function parseEnergy(energy) {
+    if (!energy) return 0;
+    return parseFloat(String(energy).replace(' Wh', '')) || 0;
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     const exportBtn = document.getElementById('exportCsv');
+    const tableBody = document.getElementById('allCompetitionsBody');
 
     fetch('/api/competition_leaderboard')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+      })
       .then(data => {
-        recordsData = data.reverse();
+        // Sort by energy (descending) and then by duration (ascending)
+        recordsData = data.sort((a, b) => {
+          const energyA = parseEnergy(a.energy);
+          const energyB = parseEnergy(b.energy);
+          if (energyB !== energyA) return energyB - energyA;
+          
+          const durationA = durationToSeconds(a.duration);
+          const durationB = durationToSeconds(b.duration);
+          return durationA - durationB;
+        });
+
         populateTable('allCompetitionsBody', recordsData, currentColumns);
         exportBtn.disabled = false;
+        
+        // Add event listeners for sorting
+        document.querySelectorAll('th').forEach(header => {
+          header.style.cursor = 'pointer';
+          header.addEventListener('click', () => {
+            const key = header.textContent.trim().toLowerCase();
+            const column = currentColumns.find(col => 
+              col.header.toLowerCase() === key || col.key.toLowerCase() === key
+            );
+            
+            if (column) {
+              const sortKey = column.key;
+              const isAsc = header.getAttribute('data-sort') === 'asc';
+              
+              recordsData.sort((a, b) => {
+                let valA, valB;
+                
+                if (sortKey === 'energy') {
+                  valA = parseEnergy(a[sortKey]);
+                  valB = parseEnergy(b[sortKey]);
+                } else if (sortKey === 'duration') {
+                  valA = durationToSeconds(a[sortKey]);
+                  valB = durationToSeconds(b[sortKey]);
+                } else {
+                  valA = String(a[sortKey] || '').toLowerCase();
+                  valB = String(b[sortKey] || '').toLowerCase();
+                }
+                
+                if (valA < valB) return isAsc ? -1 : 1;
+                if (valA > valB) return isAsc ? 1 : -1;
+                return 0;
+              });
+              
+              // Toggle sort direction
+              header.setAttribute('data-sort', isAsc ? 'desc' : 'asc');
+              header.innerHTML = `${column.header} ${isAsc ? '↓' : '↑'}`;
+              
+              // Reset other headers
+              document.querySelectorAll('th').forEach(h => {
+                if (h !== header) {
+                  h.removeAttribute('data-sort');
+                  h.innerHTML = h.textContent.replace(/[↑↓]\s*$/, '');
+                }
+              });
+              
+              populateTable('allCompetitionsBody', recordsData, currentColumns);
+            }
+          });
+        });
       })
       .catch(err => {
         console.error("❌ Failed to load leaderboard:", err);
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="5" class="no-data">
+              Error loading leaderboard: ${err.message}
+            </td>
+          </tr>`;
       });
 
     exportBtn.addEventListener('click', () => {

@@ -3,6 +3,7 @@ import csv
 import os
 import time
 from datetime import datetime
+from flask import jsonify
 
 active_sessions = {}  # Maps cycle_id to FlaskSessionTracker
 
@@ -63,6 +64,8 @@ class FlaskSessionTracker:
         self.voltage_samples = 0
 
     def get_live_energy(self):
+        print(f"[DEBUG] Getting live energy for cycle {self.cycle_id} - Running: {self.running}")
+        print(f"[DEBUG] Total voltage: {self.total_voltage}, Samples: {self.voltage_samples}")
         if not self.running:
             return 0.0
         elapsed = time.time() - self.start_time
@@ -89,13 +92,22 @@ def log_data(data_list):
         if tracker:
             tracker.update_voltage(voltage)
 
+ 
 def get_live_energy_for_all_cycles():
+    print("\n[DEBUG] Generating live energy report...")
+    print(f"Active sessions: {list(active_sessions.keys())}")
     result = {}
     for cycle_id, tracker in active_sessions.items():
+        print(f"Cycle {cycle_id} - Running: {tracker.running}")
+        print(f"Voltage: {tracker.total_voltage}, Samples: {tracker.voltage_samples}")
+        print(f"Energy: {tracker.get_live_energy()}")
+
         result[str(cycle_id)] = {
             "energy": round(tracker.get_live_energy(), 2)
         }
-    return result           
+    print(f"\n[DEBUG] Final result: {result}")
+    return result 
+          
 def get_normal_sessions():
     filename = 'data/normal_sessions.csv'
     records = []
@@ -137,3 +149,68 @@ def get_competition_sessions(competition=True):
     except Exception as e:
         print(f"[Competition] Error reading CSV: {e}")
     return records
+
+
+def competition_leaderboard():
+    records = []
+
+    if not os.path.exists('data/competition_sessions.csv'):
+        return jsonify([])
+
+    try:
+        with open('data/competition_sessions.csv', newline='') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                duration_sec = int(row["Duration (s)"])
+                energy_wh = float(row["Energy (kWh)"]) * 1000
+                records.append({
+                    "name": row["Student"],
+                    "cycle": row["Cycle"],
+                    "duration": f"{duration_sec//60:02}:{duration_sec%60:02}",
+                    "timestamp": row["Timestamp"],
+                    "energy": f"{energy_wh:.1f} Wh"
+                })
+    except Exception as e:
+        print(f"[Leaderboard API] Error reading CSV: {e}")
+    
+    return jsonify(records)
+
+
+def read_competition_csv():
+    path = 'data/competition_sessions.csv'
+    out = []
+    if not os.path.exists(path):
+        return out
+
+    with open(path, newline='') as f:
+        reader = csv.reader(f)
+        first = next(reader, None)
+        if first is None:
+            return out
+        has_header = first and first[0].lower().startswith("timestamp")
+        rows = reader if has_header else [first] + list(reader)
+
+        for r in rows:
+            try:
+                ts, cycle, student, start, end, dur_s, energy_kwh = r
+                dur_s = int(dur_s)
+                energy_wh = float(energy_kwh) * 1000.0
+
+                # --- format the date here ---
+                # keep the original if you still want it
+                nice_ts = ts.replace('T', ' ').split('.')[0]   # "2025-07-22 16:36:59"
+                # or if you only want YYYY-MM-DD:
+                # nice_ts = ts.split('T')[0]
+
+                out.append({
+                    "timestamp": nice_ts,          # same key the UI expects
+                    "cycle": cycle,
+                    "name": student,
+                    "start": start,
+                    "end": end,
+                    "duration": f"{dur_s//60:02}:{dur_s%60:02}",
+                    "energy": f"{energy_wh:.1f} Wh"
+                })
+            except Exception as e:
+                print("[CSV PARSE]", e, r)
+    return out

@@ -9,53 +9,66 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <link rel="stylesheet" href="/static/css/choices.min.css">
   <script src="/static/js/choices.min.js" defer></script>
+  <style>
+    /* Quick flex to get everything on one line */
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-actions a {
+      margin-left: 1rem;
+    }
+    /* You can remove any .cycles-toolbar-edge or .cycle-title rules, since that section is gone */
+  </style>
 </head>
 <body>
   <div class="container">
-    <header class="header">
-      <div class="header-top">
-        <h1>Gym Racing Arena</h1>
-      </div>
-    </header>
+<header class="header">
+  <div class="header-top">
+    <a href="#" class="log-button" onclick="handleLogAccess(event)">
+      <i class="fas fa-clipboard-list"></i>
+      View Logs
+    </a>
+
+    <h1>Gym Racing Arena</h1>
+
+    <a href="#" class="mode-btn competition" onclick="openCompetitionModal()">
+      <i class="fas fa-trophy"></i>
+      Competition Mode
+    </a>
+  </div>
+</header>
+
 
     <main class="main-content">
-      <!-- Toolbar row -->
-      <div class="cycles-toolbar-edge">
-        <a href="#" class="log-button" onclick="handleLogAccess(event)">
-          <i class="fas fa-clipboard-list"></i>
-          View Logs
-        </a>
-
-        <h2 class="cycle-title">Available Cycles</h2>
-
-        <a href="#" class="mode-btn competition" onclick="openCompetitionModal()">
-            <i class="fas fa-trophy"></i>
-            Competition Mode
-        </a>
-
-     
-      </div>
+      <!-- “Available Cycles” toolbar removed entirely -->
 
       <div class="cycles-container">
         <div class="cycles-grid" id="cyclesContainer">
           <!-- Cycle cards will be inserted here dynamically -->
         </div>
       </div>
+
       <!-- Competition Mode Confirmation Modal -->
-    <div id="competitionModal" class="popup">
-    <div class="popup-content">
-        <span class="close-btn" onclick="closeCompetitionModal()">&times;</span>
-        <h3>Switch to Competition Mode?</h3>
-        <p>This will stop all ongoing races. Are you sure?</p>
-        <div style="margin-top: 1.5rem; text-align: right;">
-        <button class="save-btn" onclick="confirmCompetitionMode()">Yes, Switch</button>
-        <button class="save-btn" style="background-color: #ccc; margin-left: 0.5rem;" onclick="closeCompetitionModal()">Cancel</button>
-        </div>
+<div id="competitionModal" class="popup">
+  <div class="popup-content">
+    <button class="close-btn" onclick="closeCompetitionModal()">×</button>
+    <h3>Switch to Competition Mode?</h3>
+    <p>This will stop all ongoing races. Are you sure?</p>
+
+    <div class="modal-actions">
+ <button class="save-btn" onclick="confirmCompetitionMode()">Yes, Switch</button>
+            <button class="save-btn" onclick="closeCompetitionModal()">Cancel</button>
+          
     </div>
-    </div>
+  </div>
+</div>
+
+      <!-- Register New User Modal -->
       <div id="registerPopup" class="popup">
         <div class="popup-content">
-          <span class="close-btn">&times;</span>
+          <span class="close-btn" onclick="closeRegisterPopup()">&times;</span>
           <h3>Register New User</h3>
           <div class="form-group">
             <input type="text" id="userName" placeholder="Enter your name" class="form-input" required />
@@ -65,17 +78,19 @@
       </div>
     </main>
   </div>
+
   <!-- Password Modal -->
-<div id="passwordModal" class="popup">
-  <div class="popup-content">
-    <span class="close-btn" onclick="closePasswordModal()">&times;</span>
-    <h3>Enter Password to View Logs</h3>
-    <div class="form-group">
-      <input type="password" id="logPassword" class="form-input" placeholder="Enter password" />
+  <div id="passwordModal" class="popup">
+    <div class="popup-content">
+      <span class="close-btn" onclick="closePasswordModal()">&times;</span>
+      <h3>Enter Password to View Logs</h3>
+      <div class="form-group">
+        <input type="password" id="logPassword" class="form-input" placeholder="Enter password" />
+      </div>
+      <button onclick="verifyPassword()" class="save-btn">Submit</button>
     </div>
-    <button onclick="verifyPassword()" class="save-btn">Submit</button>
   </div>
-</div>
+
   <script src="/static/js/script.js"></script>
 </body>
 </html>

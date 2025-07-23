@@ -54,6 +54,7 @@ function startRace(select) {
     }).catch(() => {
         console.warn("API endpoint /api/register not found. Make sure Flask route exists.");
     });
+    console.log(`Starting ${user.name} and ${cycleId}`);
 
     const startBtn = card.querySelector('.start-btn');
     const stopBtn = card.querySelector('.stop-btn');
@@ -82,6 +83,10 @@ function handleLogAccess(e) {
     function closePasswordModal() {
     document.getElementById('passwordModal').style.display = 'none';
     }
+
+    function closeRegisterPopup() {
+  document.getElementById('registerPopup').style.display = 'none';
+}
 
     function verifyPassword() {
     const password = document.getElementById('logPassword').value;
@@ -121,10 +126,10 @@ function createCycleCards() {
         card.innerHTML = `
             <div class="cycle-avatar">C${i}</div>
             <div class="cycle-name">Cycle ${i}</div>
-            <div class="cycle-race-info" style="display: none;">
-                <div class="race-duration">00:00</div>
-                <div class="energy-generated">0 Wh</div>
-            </div>
+<div class="cycle-race-info" style="display:none;">
+  <span class="race-duration">00:00</span>
+  <span class="energy-generated">0 Wh</span>
+</div>
             <div class="cycle-controls">
                 <select class="cycle-user-select choices-select" data-placeholder="Select User">
                     <option value="">Select User</option>
@@ -353,7 +358,30 @@ function saveUser() {
     showNotification(`User "${name}" registered successfully!`);
 }
 
-
+ 
+function pollLiveEnergy() {
+    console.log('pollLiveEnergy ... ');
+    fetch('/api/live_energy')
+        .then(res => {
+          console.log('Response Status ... ', res.status);
+          return res.json()
+        })
+        .then(data => {
+          console.log('Data ... ', data);
+            Object.entries(data).forEach(([cycleId, info]) => {
+                const card = document.querySelector(`.cycle-card[data-cycle-id="${cycleId}"]`);
+                if (card) {
+                    const energyEl = card.querySelector('.energy-generated');
+                    if (energyEl) {
+                        energyEl.textContent = `${info.energy.toFixed(3)} Wh`;
+                    }
+                }
+            });
+        })
+        .catch(err => console.error('❌ Poll failed:', err));
+}
+setInterval(pollLiveEnergy, 1000);
+/*
 function pollLiveEnergy() {
     fetch('/api/live_energy')
         .then(res => res.json())
@@ -363,10 +391,11 @@ function pollLiveEnergy() {
                 if (card) {
                     const energyEl = card.querySelector('.energy-generated');
                     if (energyEl) {
-                        energyEl.textContent = `${info.energy.toFixed(1)} Wh`;
+                        energyEl.textContent = `${info.energy.toFixed(3)} Wh`;
                     }
                 }
             });
         });
 }
 setInterval(pollLiveEnergy, 1000); 
+*/

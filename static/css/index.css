@@ -493,7 +493,6 @@ body {
 }
 
 
-
 .cycles-grid {
   overflow: visible !important;
   position: relative;
@@ -592,13 +591,17 @@ body {
 }
 
 /* Race Info */
-.cycle-race-info {
-    width: 100%;
-    margin: 0.5rem 0;
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.9rem;
-    color: var(--text-light);
+.cycle-race-info{
+  display: inline-flex;     /* stays on one line */
+  flex-wrap: nowrap;
+  gap: 8px;
+  white-space: nowrap;      /* prevent wrapping */
+}
+
+.cycle-race-info .race-duration,
+.cycle-race-info .energy-generated{
+  display: inline;          /* just in case something set them to block */
+  white-space: nowrap;
 }
 
 .race-duration,
@@ -609,12 +612,12 @@ body {
 }
 
 .race-duration::before {
-    content: 'â±ï¸';
+    content: '⏱️';
     font-size: 1rem;
 }
 
 .energy-generated::before {
-    content: 'âš¡';
+    content: '⚡';
     font-size: 1rem;
 }
 
@@ -695,6 +698,15 @@ body {
     position: relative;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
+.modal-actions{
+  display:flex;
+  justify-content:flex-end;   /* or center/space-between */
+  gap:8px;                    /* “small minute” gap */
+}
+
+.save-btn.cancel{
+  background:#ccc;
+}
 
 .close-btn {
     position: absolute;
@@ -772,3 +784,6 @@ body {
 .notification.show {
     transform: translateX(-50%) translateY(0);
 }
+
+
+
