@@ -1,4 +1,4 @@
-# Flask-JCMK-GYM
+# GymRacing-Arena
 
 A Flask-based application for tracking and logging gym data (voltage, current, power) from ESP32-connected equipment, featuring both normal logging and competition modes.
 
