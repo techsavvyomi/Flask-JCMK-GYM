@@ -113,7 +113,7 @@ def get_normal_sessions():
             for row in reader:
                 _add_record(records, row)
     except Exception as e:
-        print(f"[Tracker] Error reading CSV: {e}")
+        print(f"[Tracker] Error reading normal sessions CSV: {e}")
     return records
 
 def _add_record(records, row):
