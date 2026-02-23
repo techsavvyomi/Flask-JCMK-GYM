@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 class Config:
+    """Base configuration for the Flask application."""
     # Flask settings
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
     DEBUG = os.getenv("FLASK_DEBUG", "True").lower() in ("true", "1", "t")
